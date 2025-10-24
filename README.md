@@ -1,6 +1,6 @@
 # Project Samarth - Intelligent Q&A System for Indian Agriculture
 
-🌾 **Phase 3 Complete**: Production-ready deployment with Next.js frontend, enhanced provenance tracking, CI/CD pipeline, and comprehensive monitoring.
+🌾 **LIVE DATA INTEGRATION COMPLETE**: Real-time data fetching from data.gov.in API, production deployment, and comprehensive monitoring.
 
 ## 🚀 Quick Start
 
@@ -27,23 +27,32 @@ See [README_DEPLOY.md](README_DEPLOY.md) for cloud deployment instructions.
 
 ## 💡 Sample Questions
 
+### Historical Data (2001-2014)
 - "Compare the average annual rainfall in Maharashtra and Punjab"
 - "Which state has the highest rice production?"
-- "Show me the correlation between rainfall and crop production"
-- "What is the average wheat production in Punjab?"
 - "Analyze the production trend of cotton from 2010 to 2014"
+
+### Live Data (Real-time API)
+- "What are the current crop prices in Maharashtra?"
+- "Show me latest market rates for Punjab"
+- "Compare recent commodity prices across states"
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │  Frontend   │◄──►│   FastAPI   │◄──►│    Core     │
-│ (Streamlit) │    │   Backend   │    │   Modules   │
+│ (Next.js)   │    │   Backend   │    │   Modules   │
 └─────────────┘    └─────────────┘    └─────────────┘
                            │                   │
                    ┌─────────────┐    ┌─────────────┐
-                   │   DuckDB    │    │   Logging   │
-                   │  Database   │    │ & Citations │
+                   │ Live API    │    │   DuckDB    │
+                   │data.gov.in  │    │  Database   │
+                   └─────────────┘    └─────────────┘
+                           │                   │
+                   ┌─────────────┐    ┌─────────────┐
+                   │Real-time    │    │ Historical  │
+                   │Market Data  │    │ Sample Data │
                    └─────────────┘    └─────────────┘
 ```
 
@@ -66,6 +75,8 @@ See [README_DEPLOY.md](README_DEPLOY.md) for cloud deployment instructions.
 - ✅ **Health Monitoring** - Comprehensive system status
 
 ### Enhanced Backend
+- ✅ **Live Data Integration** - Real-time API connection to data.gov.in
+- ✅ **Smart Query Routing** - Auto-detects live vs historical queries
 - ✅ **Request Tracing** - UUID-based request tracking
 - ✅ **CORS Configuration** - Production-ready cross-origin setup
 - ✅ **Monitoring Endpoints** - `/health`, `/metrics`, `/raw/{id}`
@@ -82,8 +93,10 @@ See [README_DEPLOY.md](README_DEPLOY.md) for cloud deployment instructions.
 - ✅ **Citation System** - Full traceability to source datasets
 
 ### Database & Data
+- ✅ **Live API Integration** - Real-time data from data.gov.in with API key
 - ✅ **Canonical Database** (`db/canonical.duckdb`) - 400 sample records
-- ✅ **10 Integrated Datasets** - Agriculture and climate data from data.gov.in
+- ✅ **12 Integrated Datasets** - Agriculture, climate, and live market data
+- ✅ **Hybrid Data Sources** - Live API + Historical database
 - ✅ **Sample Data** - 10 states × 7 crops × 5 years
 
 ### User Interfaces
@@ -93,19 +106,22 @@ See [README_DEPLOY.md](README_DEPLOY.md) for cloud deployment instructions.
 
 ## 📈 Performance
 
-- **Response Time**: < 2 seconds
-- **Database Size**: 12MB
-- **Query Types**: Comparison, Trend, Correlation, Ranking
+- **Response Time**: < 2 seconds (live API + local data)
+- **Database Size**: 12MB + Live API
+- **Query Types**: Comparison, Trend, Correlation, Ranking, Current
+- **Data Sources**: Historical (2001-2014) + Live (Real-time)
 - **Citation Accuracy**: 100% traceability
 
 ## 🗂️ Phase 1 (Dataset Discovery)
 
-### Key Datasets Discovered
-1. **District wise Season wise Crop Production** (2001-2014) - High Priority
-2. **District wise Rainfall Normal** (1951-2000) - High Priority  
-3. **State wise Monthly Rainfall** (1901-2015) - Long-term series
-4. **Agricultural Statistics at a Glance** - Comprehensive stats
-5. **IMD Gridded Rainfall** - Requires registration
+### Key Datasets Integrated
+1. **Live Market Prices** (Real-time) - API Integration ⚡
+2. **Live Agriculture Production** (Current) - API Integration ⚡
+3. **District wise Season wise Crop Production** (2001-2014) - Historical
+4. **District wise Rainfall Normal** (1951-2000) - Historical
+5. **State wise Monthly Rainfall** (1901-2015) - Long-term series
+6. **Agricultural Statistics at a Glance** - Comprehensive stats
+7. **IMD Gridded Rainfall** - Requires registration
 
 ### Data Ingestion
 ```bash
@@ -139,8 +155,17 @@ python test_api.py
 - **Secondary**: USGS/CHG CHIRPS (fallback climate data)
 - **Access**: Most datasets publicly available, IMD gridded data requires registration
 
-## 🎯 Next Steps (Phase 3)
-- Advanced visualization with charts/maps
-- Real-time data ingestion pipeline
+## 🎯 System Capabilities
+
+### ✅ **Completed Features**
+- ✅ **Live Data Integration** - Real-time API from data.gov.in
+- ✅ **Advanced Visualization** - Charts and trend analysis
+- ✅ **Production Deployment** - Render + Vercel
+- ✅ **Complete Provenance** - Full audit trail
+- ✅ **Citation System** - 100% traceability
+
+### 🚀 **Future Enhancements**
 - Machine learning predictions
 - Mobile app development
+- Advanced geospatial analysis
+- Multi-language support
