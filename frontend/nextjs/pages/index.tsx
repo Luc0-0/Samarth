@@ -20,11 +20,13 @@ interface ChatMessage {
 
 const SAMPLE_QUESTIONS = [
   "Compare the average annual rainfall in Maharashtra and Punjab",
+  "What are the current crop prices in Maharashtra?", 
+  "Show me latest market rates for Punjab",
   "Which state has the highest rice production?",
-  "Show me the correlation between rainfall and crop production",
-  "What is the average wheat production in Punjab?",
   "Analyze the production trend of cotton from 2010 to 2014"
 ];
+
+const LIVE_KEYWORDS = ['current', 'latest', 'recent', 'live', 'today', 'now', 'market', 'price'];
 
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -141,6 +143,9 @@ export default function Home() {
             <span className="ml-3 text-sm font-normal text-gray-600">
               Intelligent Q&A for Indian Agriculture
             </span>
+            <span className="ml-3 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+              LIVE API
+            </span>
           </h1>
         </div>
       </header>
@@ -150,17 +155,41 @@ export default function Home() {
         {/* Sample Questions */}
         {messages.length === 0 && (
           <div className="mb-8">
+            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                ⚡ Live Data Integration Active
+              </h2>
+              <p className="text-sm text-gray-600">
+                System automatically fetches <strong>real-time data</strong> from data.gov.in API for current queries, 
+                and uses historical data for trend analysis.
+              </p>
+            </div>
+            
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Try these sample questions:</h2>
             <div className="grid gap-3 md:grid-cols-2">
-              {SAMPLE_QUESTIONS.map((question, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSampleQuestion(question)}
-                  className="p-3 text-left bg-white rounded-lg border hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                >
-                  <span className="text-sm text-gray-700">{question}</span>
-                </button>
-              ))}
+              {SAMPLE_QUESTIONS.map((question, index) => {
+                const isLive = LIVE_KEYWORDS.some(keyword => question.toLowerCase().includes(keyword));
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleSampleQuestion(question)}
+                    className={`p-3 text-left rounded-lg border transition-colors ${
+                      isLive 
+                        ? 'bg-green-50 border-green-200 hover:border-green-300 hover:bg-green-100'
+                        : 'bg-white hover:border-blue-300 hover:bg-blue-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <span className="text-sm text-gray-700">{question}</span>
+                      {isLive && (
+                        <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                          LIVE
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -180,6 +209,21 @@ export default function Home() {
                 }`}
               >
                 <div className="whitespace-pre-wrap">{message.content}</div>
+                
+                {/* Data Source Indicator */}
+                {message.response && (
+                  <div className="mt-2 flex items-center text-xs text-gray-500">
+                    {message.response.processing_info.query_type === 'current' ? (
+                      <span className="flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                        ⚡ Live API Data
+                      </span>
+                    ) : (
+                      <span className="flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                        📈 Historical Data
+                      </span>
+                    )}
+                  </div>
+                )}
                 
                 {/* Structured Results */}
                 {message.response?.structured_results && message.response.structured_results.length > 0 && (
