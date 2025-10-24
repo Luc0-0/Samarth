@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ExternalLink, Database, Clock } from 'lucide-react';
+import { ExternalLink, Database, Clock, Download } from 'lucide-react';
 import { Citation } from '../lib/api';
 
 interface CitationPanelProps {
@@ -47,6 +47,10 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
         </div>
       </div>
 
+      <div className="mb-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
+        📝 Note: Original gov portal links may be outdated. Use download button for actual data samples.
+      </div>
+      
       <div className="space-y-2">
         {citations.map((citation, index) => (
           <div key={index} className="flex items-start justify-between p-2 bg-white rounded border">
@@ -64,15 +68,25 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
               )}
             </div>
             
-            <a
-              href={citation.resource_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-3 text-blue-600 hover:text-blue-800 transition-colors"
-              title="Open original dataset"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
+            <div className="ml-3 flex space-x-2">
+              <button
+                onClick={() => {
+                  const datasetId = citation.dataset_title.toLowerCase().includes('rainfall') ? 'climate-1' : 'agri-1';
+                  window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/raw/${datasetId}`, '_blank');
+                }}
+                className="text-green-600 hover:text-green-800 transition-colors"
+                title="Download sample data"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <span className="text-gray-400">|</span>
+              <span
+                className="text-gray-500 cursor-not-allowed"
+                title="Original link may be outdated (common with gov portals)"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </span>
+            </div>
           </div>
         ))}
       </div>

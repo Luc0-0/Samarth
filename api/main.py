@@ -23,12 +23,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.nlu import IntentParser
 from core.source_selector import SourceSelector
 from core.query_planner import QueryPlanner
+from core.live_query_planner import LiveQueryPlanner
 from core.synthesizer import AnswerSynthesizer
 
 # Environment variables
 DB_PATH = os.getenv('DB_PATH', 'db/canonical.duckdb')
 CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000,https://samarth-4c81e5wic-nipun-sujeshs-projects.vercel.app').split(',')
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
+GOV_API_KEY = os.getenv('GOV_API_KEY', '579b464db66ec23bdd0000019ec8d2f81ad84120490e03027b8842b3')
 
 # Setup logging
 os.makedirs('logs', exist_ok=True)
@@ -64,7 +66,7 @@ start_time = time.time()
 # Initialize components
 intent_parser = IntentParser()
 source_selector = SourceSelector()
-query_planner = QueryPlanner(DB_PATH)
+query_planner = LiveQueryPlanner(DB_PATH, GOV_API_KEY)  # Use live query planner
 answer_synthesizer = AnswerSynthesizer()
 
 class QuestionRequest(BaseModel):

@@ -27,6 +27,7 @@ class IntentParser:
             'area': ['area', 'acreage', 'cultivation'],
             'rainfall': ['rainfall', 'precipitation', 'rain'],
             'temperature': ['temperature', 'temp'],
+            'price': ['price', 'cost', 'rate', 'market', 'mandi'],
             'correlation': ['correlation', 'relationship', 'impact', 'effect']
         }
 
@@ -108,7 +109,11 @@ class IntentParser:
 
     def _determine_query_type(self, text: str) -> str:
         """Determine the type of query"""
-        if any(word in text for word in ['compare', 'comparison', 'versus', 'vs']):
+        # Check for live data keywords first
+        live_keywords = ['current', 'latest', 'recent', 'live', 'today', 'now', 'real-time', 'up-to-date', 'fresh', 'new']
+        if any(keyword in text for keyword in live_keywords):
+            return 'current'
+        elif any(word in text for word in ['compare', 'comparison', 'versus', 'vs']):
             return 'comparison'
         elif any(word in text for word in ['trend', 'over time', 'change']):
             return 'trend'
