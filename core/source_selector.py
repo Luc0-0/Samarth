@@ -54,6 +54,7 @@ class SourceSelector:
             sources.append({
                 'dataset_id': row['dataset_id'],
                 'dataset_title': row['dataset_title'],
+                'publisher': row['publisher'],
                 'resource_url': row['resource_url'],
                 'resource_format': row['resource_format'],
                 'geo_granularity': row['geo_granularity'],
@@ -87,6 +88,7 @@ class SourceSelector:
             sources.append({
                 'dataset_id': row['dataset_id'],
                 'dataset_title': row['dataset_title'],
+                'publisher': row['publisher'],
                 'resource_url': row['resource_url'],
                 'resource_format': row['resource_format'],
                 'geo_granularity': row['geo_granularity'],
