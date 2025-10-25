@@ -2,14 +2,14 @@
 
 🌾 **PRODUCTION READY**: Live data.gov.in API integration, premium frontend, cloud deployment, and enterprise-grade monitoring.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-brightgreen)](https://samarth-4c81e5wic-nipun-sujeshs-projects.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-brightgreen)](https://samarth-two.vercel.app)
 [![API Status](https://img.shields.io/badge/API-Render-blue)](https://samarth-backend-vd02.onrender.com)
 [![GitHub Actions](https://github.com/Luc0-0/Samarth/workflows/Simple%20CI/badge.svg)](https://github.com/Luc0-0/Samarth/actions)
 
 ## 🚀 Quick Start
 
 ### 🌐 **Live Demo** (Recommended)
-- **Frontend**: https://samarth-4c81e5wic-nipun-sujeshs-projects.vercel.app
+- **Frontend**: https://samarth-two.vercel.app
 - **Backend API**: https://samarth-backend-vd02.onrender.com
 - **API Docs**: https://samarth-backend-vd02.onrender.com/docs
 
@@ -212,7 +212,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## 🎬 **Demo Ready**
 
-**Live System**: https://samarth-4c81e5wic-nipun-sujeshs-projects.vercel.app
+**Live System**: https://samarth-two.vercel.app
 
 **Perfect for showcasing**: Government data integration, live API capabilities, natural language processing, and production-ready deployment.
 
