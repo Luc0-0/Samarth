@@ -47,28 +47,28 @@ class LiveQueryPlanner(QueryPlanner):
         
         results_df = pd.DataFrame()
         
-        # Fetch agriculture data if needed
-        if any('agri' in src['dataset_id'] for src in sources):
+        # Fetch live data if needed
+        if any('live' in src['dataset_id'] for src in sources):
+            live_data = self.live_fetcher.get_agriculture_data(
+                states=intent.get('states', []),
+                crops=intent.get('crops', [])
+            )
+            
+            if not live_data.empty:
+                # Standardize column names
+                live_data = self._standardize_agriculture_columns(live_data)
+                results_df = pd.concat([results_df, live_data], ignore_index=True)
+        
+        # Also try agriculture data for fallback
+        if results_df.empty and any('agri' in src['dataset_id'] for src in sources):
             agri_data = self.live_fetcher.get_agriculture_data(
                 states=intent.get('states', []),
                 crops=intent.get('crops', [])
             )
             
             if not agri_data.empty:
-                # Standardize column names
                 agri_data = self._standardize_agriculture_columns(agri_data)
                 results_df = pd.concat([results_df, agri_data], ignore_index=True)
-        
-        # Fetch climate data if needed  
-        if any('climate' in src['dataset_id'] for src in sources):
-            climate_data = self.live_fetcher.get_rainfall_data(
-                states=intent.get('states', [])
-            )
-            
-            if not climate_data.empty:
-                # Standardize column names
-                climate_data = self._standardize_climate_columns(climate_data)
-                results_df = pd.concat([results_df, climate_data], ignore_index=True)
         
         if results_df.empty:
             return {'error': 'No live data available for your query'}

@@ -15,6 +15,10 @@ class SourceSelector:
         relevant_sources = []
         
         # Filter by metrics needed
+        if 'price' in intent['metrics'] or intent['query_type'] == 'current':
+            live_sources = self._get_live_sources(intent)
+            relevant_sources.extend(live_sources)
+            
         if 'production' in intent['metrics'] or 'area' in intent['metrics']:
             agri_sources = self._get_agriculture_sources(intent)
             relevant_sources.extend(agri_sources)
@@ -100,6 +104,28 @@ class SourceSelector:
             })
             
         return sorted(sources, key=lambda x: x['priority'])
+    
+    def _get_live_sources(self, intent: Dict) -> List[Dict]:
+        """Get live API datasets for current/price queries"""
+        live_data = self.inventory[self.inventory['dataset_id'].str.startswith('live')]
+        
+        sources = []
+        for _, row in live_data.iterrows():
+            sources.append({
+                'dataset_id': row['dataset_id'],
+                'dataset_title': row['dataset_title'],
+                'publisher': row['publisher'],
+                'resource_url': row['resource_url'],
+                'resource_format': row['resource_format'],
+                'geo_granularity': row['geo_granularity'],
+                'temporal_granularity': row['temporal_granularity'],
+                'available_years': row['available_years'],
+                'fields_summary': row['fields_summary'],
+                'priority': 1,
+                'table_name': f"live_{row['dataset_id'].replace('-', '_')}"
+            })
+            
+        return sources
     
     def _deduplicate_and_prioritize(self, sources: List[Dict], intent: Dict) -> List[Dict]:
         """Remove duplicates and prioritize sources"""
