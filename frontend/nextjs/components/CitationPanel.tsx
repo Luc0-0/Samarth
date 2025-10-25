@@ -23,16 +23,16 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
   }
 
   return (
-    <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-          <Database className="w-4 h-4 mr-2" />
+    <div className="mt-6 p-6 bg-gradient-to-br from-slate-50 to-gray-50 rounded-2xl border border-gray-200/50 shadow-lg">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center">
+          <Database className="w-5 h-5 mr-2 text-slate-600" />
           Data Sources ({citations.length})
         </h3>
         
         <div className="flex items-center space-x-4">
           {processingTime && (
-            <span className="text-xs text-gray-500 flex items-center">
+            <span className="text-xs text-gray-600 flex items-center px-2 py-1 bg-white/60 rounded-full">
               <Clock className="w-3 h-3 mr-1" />
               {processingTime.toFixed(0)}ms
             </span>
@@ -40,29 +40,29 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
           
           <button
             onClick={onShowProvenance}
-            className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
+            className="text-sm font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-md"
           >
             Show Provenance
           </button>
         </div>
       </div>
 
-      <div className="mb-2 text-xs text-amber-600 bg-amber-50 p-2 rounded">
-        📝 Note: Original gov portal links may be outdated. Use download button for actual data samples.
+      <div className="mb-4 text-sm text-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 p-3 rounded-xl border border-amber-200/50">
+        📝 <strong>Note:</strong> Original gov portal links may be outdated. Use download button for actual data samples.
       </div>
       
       <div className="space-y-2">
         {citations.map((citation, index) => (
-          <div key={index} className="flex items-start justify-between p-2 bg-white rounded border">
+          <div key={index} className="flex items-start justify-between p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex-1">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
                 {citation.dataset_title}
               </h4>
-              <p className="text-xs text-gray-600 mb-1">
-                Publisher: {citation.publisher}
+              <p className="text-xs text-gray-600 mb-1 font-medium">
+                Publisher: <span className="text-blue-600">{citation.publisher}</span>
               </p>
               {citation.query_summary && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 italic">
                   {citation.query_summary}
                 </p>
               )}

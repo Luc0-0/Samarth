@@ -110,19 +110,48 @@ export default function Home() {
       }));
 
       return (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-            <TrendingUp className="w-4 h-4 mr-2" />
+        <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200/50 shadow-lg">
+          <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
             Trend Analysis
           </h4>
-          <div className="h-64">
+          <div className="h-80 bg-white/50 rounded-xl p-4">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis 
+                  dataKey="year" 
+                  stroke="#64748b"
+                  fontSize={12}
+                  fontWeight={500}
+                />
+                <YAxis 
+                  stroke="#64748b"
+                  fontSize={12}
+                  fontWeight={500}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="url(#colorGradient)" 
+                  strokeWidth={3}
+                  dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
+                />
+                <defs>
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#6366f1" />
+                  </linearGradient>
+                </defs>
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -134,55 +163,74 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-            🌾 Project Samarth
-            <span className="ml-3 text-sm font-normal text-gray-600">
-              Intelligent Q&A for Indian Agriculture
-            </span>
-            <span className="ml-3 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-              LIVE API
-            </span>
-          </h1>
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                🌾
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Project Samarth
+                </h1>
+                <p className="text-sm text-gray-600 font-medium">
+                  Intelligent Q&A for Indian Agriculture
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-md">
+                ⚡ LIVE API
+              </span>
+              <span className="px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-md">
+                PRODUCTION
+              </span>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Sample Questions */}
         {messages.length === 0 && (
           <div className="mb-8">
-            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                ⚡ Live Data Integration Active
-              </h2>
-              <p className="text-sm text-gray-600">
-                System automatically fetches <strong>real-time data</strong> from data.gov.in API for current queries, 
-                and uses historical data for trend analysis.
+            <div className="mb-8 p-6 bg-gradient-to-r from-emerald-50 via-blue-50 to-indigo-50 rounded-2xl border border-emerald-200/50 shadow-lg backdrop-blur-sm">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-lg shadow-md">
+                  ⚡
+                </div>
+                <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-blue-700 bg-clip-text text-transparent">
+                  Live Data Integration Active
+                </h2>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                System automatically fetches <span className="font-semibold text-emerald-700">real-time data</span> from data.gov.in API for current queries, 
+                and uses <span className="font-semibold text-blue-700">historical data</span> for trend analysis.
               </p>
             </div>
             
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Try these sample questions:</h2>
-            <div className="grid gap-3 md:grid-cols-2">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">Try these sample questions:</h2>
+            <div className="grid gap-4 md:grid-cols-2">
               {SAMPLE_QUESTIONS.map((question, index) => {
                 const isLive = LIVE_KEYWORDS.some(keyword => question.toLowerCase().includes(keyword));
                 return (
                   <button
                     key={index}
                     onClick={() => handleSampleQuestion(question)}
-                    className={`p-3 text-left rounded-lg border transition-colors ${
+                    className={`p-4 text-left rounded-xl border transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg ${
                       isLive 
-                        ? 'bg-green-50 border-green-200 hover:border-green-300 hover:bg-green-100'
-                        : 'bg-white hover:border-blue-300 hover:bg-blue-50'
+                        ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 hover:border-emerald-300 hover:shadow-emerald-200/50'
+                        : 'bg-white/70 backdrop-blur-sm border-gray-200 hover:border-blue-300 hover:shadow-blue-200/50'
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <span className="text-sm text-gray-700">{question}</span>
                       {isLive && (
-                        <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                        <span className="ml-2 px-2.5 py-1 text-xs font-semibold bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full shadow-md">
                           LIVE
                         </span>
                       )}
@@ -195,30 +243,30 @@ export default function Home() {
         )}
 
         {/* Messages */}
-        <div className="space-y-6 mb-6">
+        <div className="space-y-8 mb-8">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-3xl rounded-lg px-4 py-3 ${
+                className={`max-w-4xl rounded-2xl px-6 py-4 shadow-lg ${
                   message.type === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border shadow-sm'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-200/50'
+                    : 'bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-gray-200/50'
                 }`}
               >
                 <div className="whitespace-pre-wrap">{message.content}</div>
                 
                 {/* Data Source Indicator */}
                 {message.response && (
-                  <div className="mt-2 flex items-center text-xs text-gray-500">
+                  <div className="mt-3 flex items-center">
                     {message.response.processing_info.query_type === 'current' ? (
-                      <span className="flex items-center px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                      <span className="flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full shadow-md">
                         ⚡ Live API Data
                       </span>
                     ) : (
-                      <span className="flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+                      <span className="flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-md">
                         📈 Historical Data
                       </span>
                     )}
@@ -227,9 +275,9 @@ export default function Home() {
                 
                 {/* Structured Results */}
                 {message.response?.structured_results && message.response.structured_results.length > 0 && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded border">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                      <BarChart3 className="w-4 h-4 mr-2" />
+                  <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-xl border border-gray-200/50 shadow-inner">
+                    <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                      <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
                       Data Results ({message.response.structured_results.length} records)
                     </h4>
                     <div className="overflow-x-auto">
@@ -265,7 +313,11 @@ export default function Home() {
                 )}
 
                 {/* Chart */}
-                {message.response && renderChart(message.response)}
+                {message.response && (
+                  <div className="mt-4">
+                    {renderChart(message.response)}
+                  </div>
+                )}
 
                 {/* Citations */}
                 {message.response?.citations && (
@@ -283,10 +335,10 @@ export default function Home() {
         {/* Loading */}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white border shadow-sm rounded-lg px-4 py-3">
-              <div className="flex items-center text-gray-600">
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing your question...
+            <div className="bg-white/80 backdrop-blur-md border border-gray-200/50 shadow-lg rounded-2xl px-6 py-4">
+              <div className="flex items-center text-gray-700">
+                <Loader2 className="w-5 h-5 mr-3 animate-spin text-blue-600" />
+                <span className="font-medium">Processing your question...</span>
               </div>
             </div>
           </div>
@@ -308,26 +360,28 @@ export default function Home() {
       </main>
 
       {/* Input Form */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <form onSubmit={handleSubmit} className="flex space-x-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about Indian agriculture and climate data..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loading}
-            />
+      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200/50 shadow-2xl">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <form onSubmit={handleSubmit} className="flex space-x-4">
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about Indian agriculture and climate data..."
+                className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/80 backdrop-blur-sm shadow-lg transition-all duration-300"
+                disabled={loading}
+              />
+            </div>
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-lg transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
             >
               {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <Send className="w-5 h-5" />
               )}
             </button>
           </form>
