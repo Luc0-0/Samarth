@@ -32,12 +32,15 @@ class LiveQueryPlanner(QueryPlanner):
     def _should_use_live_data(self, intent: Dict) -> bool:
         """Determine if we should fetch live data"""
         
+        question_lower = intent.get('question', '').lower()
+        
         # Use live data for current/recent queries or price queries
         if intent.get('query_type') == 'current':
             return True
         if 'price' in intent.get('metrics', []):
             return True
-        if any(keyword in intent.get('question', '').lower() for keyword in ['current', 'latest', 'recent', 'live', 'market']):
+        # Check for live keywords in the question (even for trend analysis)
+        if any(keyword in question_lower for keyword in ['current', 'latest', 'recent', 'live', 'market', 'now', 'today']):
             return True
             
         return False
@@ -194,14 +197,53 @@ class LiveQueryPlanner(QueryPlanner):
     def _process_trend_live(self, df: pd.DataFrame, intent: Dict) -> pd.DataFrame:
         """Process trend analysis on live data"""
         
-        metric = intent.get('metrics', ['production_tonnes'])[0]
+        # Determine the metric to use
+        if 'production_tonnes' in df.columns:
+            metric = 'production_tonnes'
+        elif 'price_per_quintal' in df.columns:
+            metric = 'price_per_quintal'
+        elif 'area_hectares' in df.columns:
+            metric = 'area_hectares'
+        else:
+            # Use first numeric column
+            numeric_cols = df.select_dtypes(include=['number']).columns
+            metric = numeric_cols[0] if len(numeric_cols) > 0 else 'value'
         
+        # Try to group by year if available
         if 'year' in df.columns and metric in df.columns:
             result = df.groupby('year')[metric].mean().reset_index()
             result.columns = ['year', 'avg_value']
+            result['record_count'] = df.groupby('year').size().values
             return result.sort_values('year')
         
-        return df
+        # If no year column, try to group by date
+        elif 'date' in df.columns and metric in df.columns:
+            df_copy = df.copy()
+            df_copy['date'] = pd.to_datetime(df_copy['date'], errors='coerce')
+            df_copy['year'] = df_copy['date'].dt.year
+            result = df_copy.groupby('year')[metric].mean().reset_index()
+            result.columns = ['year', 'avg_value']
+            result['record_count'] = df_copy.groupby('year').size().values
+            return result.sort_values('year')
+        
+        # If no time dimension, group by state for comparison
+        elif 'state' in df.columns and metric in df.columns:
+            result = df.groupby('state')[metric].mean().reset_index()
+            result.columns = ['state', 'avg_value']
+            result['record_count'] = df.groupby('state').size().values
+            return result.sort_values('avg_value', ascending=False)
+        
+        # Fallback: return summary statistics
+        else:
+            if metric in df.columns:
+                summary_data = {
+                    'metric': [metric],
+                    'avg_value': [df[metric].mean()],
+                    'record_count': [len(df)]
+                }
+                return pd.DataFrame(summary_data)
+        
+        return df.head(10)
     
     def _process_ranking_live(self, df: pd.DataFrame, intent: Dict) -> pd.DataFrame:
         """Process ranking query on live data"""

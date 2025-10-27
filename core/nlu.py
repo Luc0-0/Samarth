@@ -109,18 +109,18 @@ class IntentParser:
 
     def _determine_query_type(self, text: str) -> str:
         """Determine the type of query"""
-        # Check for live data keywords first
-        live_keywords = ['current', 'latest', 'recent', 'live', 'today', 'now', 'real-time', 'up-to-date', 'fresh', 'new']
-        if any(keyword in text for keyword in live_keywords):
-            return 'current'
+        # Check for specific analysis types first (higher priority)
+        if any(word in text for word in ['trend', 'over time', 'change', 'pattern', 'analyse', 'analyze']):
+            return 'trend'
         elif any(word in text for word in ['compare', 'comparison', 'versus', 'vs']):
             return 'comparison'
-        elif any(word in text for word in ['trend', 'over time', 'change']):
-            return 'trend'
         elif any(word in text for word in ['correlation', 'relationship', 'impact']):
             return 'correlation'
-        elif any(word in text for word in ['highest', 'maximum', 'top', 'best']):
+        elif any(word in text for word in ['highest', 'maximum', 'top', 'best', 'ranking']):
             return 'ranking'
+        # Check for live data keywords (lower priority than analysis types)
+        elif any(keyword in text for keyword in ['current', 'latest', 'recent', 'live', 'today', 'now', 'real-time', 'up-to-date', 'fresh', 'new']):
+            return 'current'
         elif any(word in text for word in ['average', 'mean']):
             return 'aggregation'
         else:
