@@ -177,13 +177,16 @@ python test_working_api.py
 
 ### Environment Variables
 ```bash
-# Backend
-GOV_API_KEY="Your_api_key
-CORS_ORIGINS=http://localhost:3000
+# Copy .env.example to .env and configure:
+cp .env.example .env
 
-# Frontend
+# Edit .env with your values:
+GOV_API_KEY=your_actual_api_key_here
+CORS_ORIGINS=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
+
+**🔒 Security Note**: Never commit API keys to version control. The `.env` file is gitignored for security.
 
 ## 🏆 **Technical Achievements**
 

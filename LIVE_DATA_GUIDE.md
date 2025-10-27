@@ -41,8 +41,8 @@ The system automatically detects when to use live vs historical data:
 
 ### **API Integration**
 ```python
-# Government API Key (configured)
-GOV_API_KEY = "579b464db66ec23bdd0000019ec8d2f81ad84120490e03027b8842b3"
+# Government API Key (configured via environment variable)
+GOV_API_KEY = os.getenv('GOV_API_KEY')
 
 # Live data fetcher
 fetcher = LiveDataFetcher(api_key)

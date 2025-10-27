@@ -6,6 +6,7 @@ Fetches real-time data from data.gov.in using API key
 import requests
 import pandas as pd
 import json
+import os
 from typing import Dict, List, Optional
 import time
 from datetime import datetime
@@ -14,12 +15,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 class LiveDataFetcher:
-    def __init__(self, api_key: str = "579b464db66ec23bdd0000019ec8d2f81ad84120490e03027b8842b3"):
-        self.api_key = api_key
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or os.getenv('GOV_API_KEY')
         self.base_url = "https://api.data.gov.in/resource"
+        
+        if not self.api_key:
+            logger.warning("No API key provided. Set GOV_API_KEY environment variable for live data access.")
+            
+    def _check_api_key(self) -> bool:
+        """Check if API key is available"""
+        if not self.api_key:
+            logger.error("API key not configured. Live data features disabled.")
+            return False
+        return True
         
     def fetch_dataset(self, resource_id: str, filters: Dict = None, limit: int = 100) -> pd.DataFrame:
         """Fetch live data from data.gov.in API"""
+        
+        if not self._check_api_key():
+            return pd.DataFrame()
         
         params = {
             'api-key': self.api_key,

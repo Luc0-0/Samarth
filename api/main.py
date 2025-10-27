@@ -32,7 +32,7 @@ from api.pdf_generator import generate_pdf_report
 DB_PATH = os.getenv('DB_PATH', 'db/canonical.duckdb')
 CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000,https://samarth-two.vercel.app').split(',')
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
-GOV_API_KEY = os.getenv('GOV_API_KEY', '579b464db66ec23bdd0000019ec8d2f81ad84120490e03027b8842b3')
+GOV_API_KEY = os.getenv('GOV_API_KEY')
 
 # Setup logging
 os.makedirs('logs', exist_ok=True)

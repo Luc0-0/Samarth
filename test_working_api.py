@@ -4,9 +4,10 @@ Test working API integration
 
 from core.live_fetcher import LiveDataFetcher
 import pandas as pd
+import os
 
 def test_working_api():
-    api_key = "579b464db66ec23bdd0000019ec8d2f81ad84120490e03027b8842b3"
+    api_key = os.getenv('GOV_API_KEY', 'your_api_key_here')
     fetcher = LiveDataFetcher(api_key)
     
     print("Testing live data fetcher...")
