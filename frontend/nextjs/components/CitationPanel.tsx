@@ -11,12 +11,18 @@ interface CitationPanelProps {
   citations: Citation[];
   onShowProvenance: () => void;
   processingTime?: number;
+  currentQuestion?: string;
+  currentAnswer?: string;
+  currentResults?: any[];
 }
 
 export const CitationPanel: React.FC<CitationPanelProps> = ({
   citations,
   onShowProvenance,
-  processingTime
+  processingTime,
+  currentQuestion,
+  currentAnswer,
+  currentResults
 }) => {
   if (citations.length === 0) {
     return null;
@@ -87,8 +93,8 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
             <div className="ml-3 flex space-x-2">
               <button
                 onClick={() => {
-                  // Generate PDF report
-                  const question = "Sample question for this dataset";
+                  // Generate PDF report with actual current data
+                  const question = currentQuestion || "Sample question for this dataset";
                   fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/export-pdf`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -99,7 +105,7 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'samarth-report.pdf';
+                    a.download = `samarth-${Date.now()}.pdf`;
                     a.click();
                     window.URL.revokeObjectURL(url);
                   })

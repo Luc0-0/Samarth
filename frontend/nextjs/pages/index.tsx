@@ -325,6 +325,9 @@ export default function Home() {
                     citations={message.response.citations}
                     onShowProvenance={() => openProvenance(message.response!)}
                     processingTime={message.response.processing_info.processing_time_ms}
+                    currentQuestion={message.type === 'user' ? message.content : messages.find(m => m.type === 'user' && messages.indexOf(m) < messages.indexOf(message))?.content}
+                    currentAnswer={message.response.answer_text}
+                    currentResults={message.response.structured_results}
                   />
                 )}
               </div>

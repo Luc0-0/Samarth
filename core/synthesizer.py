@@ -92,19 +92,26 @@ class AnswerSynthesizer:
         
         trend_direction = "increased" if change > 0 else "decreased"
         
+        # Format years as integers
+        start_year = int(first_year['year']) if 'year' in first_year else 'N/A'
+        end_year = int(last_year['year']) if 'year' in last_year else 'N/A'
+        
         answer = f"**Trend Analysis for {metric.replace('_', ' ')}**:\n\n"
-        answer += f"From {first_year['year']} to {last_year['year']}, the average {metric.replace('_', ' ')} "
+        answer += f"From {start_year} to {end_year}, the average {metric.replace('_', ' ')} "
         answer += f"has {trend_direction} by {abs(change):.2f} ({abs(change_pct):.1f}%).\n\n"
         
-        answer += f"**Starting value** ({first_year['year']}): {first_year['avg_value']:.2f}\n"
-        answer += f"**Ending value** ({last_year['year']}): {last_year['avg_value']:.2f}\n\n"
+        answer += f"**Starting value** ({start_year}): {first_year['avg_value']:.2f}\n"
+        answer += f"**Ending value** ({end_year}): {last_year['avg_value']:.2f}\n\n"
         
         # Find peak and trough
         max_row = results_df.loc[results_df['avg_value'].idxmax()]
         min_row = results_df.loc[results_df['avg_value'].idxmin()]
         
-        answer += f"**Peak**: {max_row['avg_value']:.2f} in {max_row['year']}\n"
-        answer += f"**Trough**: {min_row['avg_value']:.2f} in {min_row['year']}\n"
+        peak_year = int(max_row['year']) if 'year' in max_row else 'N/A'
+        trough_year = int(min_row['year']) if 'year' in min_row else 'N/A'
+        
+        answer += f"**Peak**: {max_row['avg_value']:.2f} in {peak_year}\n"
+        answer += f"**Trough**: {min_row['avg_value']:.2f} in {trough_year}\n"
         
         return answer
     
