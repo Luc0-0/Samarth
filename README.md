@@ -178,7 +178,7 @@ python test_working_api.py
 ### Environment Variables
 ```bash
 # Backend
-GOV_API_KEY=579b464db66ec23bdd0000019ec8d2f81ad84120490e03027b8842b3
+GOV_API_KEY="Your_api_key
 CORS_ORIGINS=http://localhost:3000
 
 # Frontend
