@@ -69,24 +69,36 @@ class LiveDataFetcher:
     def get_agriculture_data(self, states: List[str] = None, crops: List[str] = None) -> pd.DataFrame:
         """Fetch live agriculture production data"""
         
-        # Try multiple known agriculture resource IDs
+        # Try known working resource IDs from data inventory
         resource_ids = [
-            "9ef84268-d588-465a-a308-a864a43d0070",
-            "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69",
-            "be309c42-c2b6-4d0b-9c8e-7e8e8e8e8e8e"
+            "9ef84268-d588-465a-a308-a864a43d0070",  # Market prices
+            "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69",  # Agriculture production
         ]
         
+        logger.info(f"Attempting to fetch live agriculture data for states: {states}, crops: {crops}")
+        
         for resource_id in resource_ids:
-            filters = {}
-            if states:
-                filters['filters[state_name]'] = ','.join(states)
-            if crops:
-                filters['filters[crop]'] = ','.join(crops)
+            try:
+                filters = {}
+                if states:
+                    # Try different filter formats
+                    for state_field in ['state', 'state_name', 'State', 'State_Name']:
+                        filters[f'filters[{state_field}]'] = ','.join(states)
+                if crops:
+                    for crop_field in ['crop', 'commodity', 'Crop', 'Commodity']:
+                        filters[f'filters[{crop_field}]'] = ','.join(crops)
+                    
+                df = self.fetch_dataset(resource_id, filters)
+                if not df.empty:
+                    logger.info(f"Successfully fetched {len(df)} records from {resource_id}")
+                    return df
+                else:
+                    logger.warning(f"No data returned from resource {resource_id}")
+            except Exception as e:
+                logger.error(f"Failed to fetch from resource {resource_id}: {str(e)}")
+                continue
                 
-            df = self.fetch_dataset(resource_id, filters)
-            if not df.empty:
-                return df
-                
+        logger.warning("No live agriculture data available from any resource")
         return pd.DataFrame()
     
     def get_rainfall_data(self, states: List[str] = None) -> pd.DataFrame:

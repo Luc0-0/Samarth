@@ -71,7 +71,11 @@ class LiveQueryPlanner(QueryPlanner):
                 results_df = pd.concat([results_df, agri_data], ignore_index=True)
         
         if results_df.empty:
-            return {'error': 'No live data available for your query'}
+            logger.warning(f"No live data found for query: {intent.get('question', 'Unknown')}")
+            return {
+                'error': 'No live data available for your query. The government API may be temporarily unavailable or the resource IDs may have changed. Please try a historical query instead.',
+                'suggestion': 'Try asking about historical data (2001-2014) or remove words like "current", "latest", "recent" from your question.'
+            }
         
         # Process the live data based on query type
         processed_results = self._process_live_results(results_df, intent)
