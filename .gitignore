@@ -43,6 +43,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+ingestion/logs/
 
 # Database
 *.db
@@ -57,7 +58,19 @@ yarn-error.log*
 # Next.js
 .next/
 out/
+frontend/nextjs/.next/
 
 # Temporary files
 *.tmp
 *.temp
+
+# Development/test files
+test_*.py
+quick_test.py
+simple_test.py
+*.ipynb
+phase*_summary.md
+README_DEPLOY.md
+LIVE_DATA_GUIDE.md
+*.bat
+*.sh
