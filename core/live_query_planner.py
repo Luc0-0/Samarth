@@ -22,11 +22,17 @@ class LiveQueryPlanner(QueryPlanner):
         # Try live data first if API key available
         if self.live_fetcher and self._should_use_live_data(intent):
             try:
-                return self._execute_live_query(intent, sources)
+                logger.info(f"Attempting live data query for: {intent.get('question', 'Unknown')}")
+                result = self._execute_live_query(intent, sources)
+                logger.info(f"Live data query completed successfully")
+                return result
             except Exception as e:
-                logger.warning(f"Live data fetch failed, falling back to local: {str(e)}")
+                logger.error(f"Live data fetch failed, falling back to local: {str(e)}")
+                import traceback
+                logger.error(f"Full traceback: {traceback.format_exc()}")
         
         # Fallback to local data
+        logger.info("Using local database for query")
         return super().execute_query(intent, sources)
     
     def _should_use_live_data(self, intent: Dict) -> bool:
@@ -197,51 +203,79 @@ class LiveQueryPlanner(QueryPlanner):
     def _process_trend_live(self, df: pd.DataFrame, intent: Dict) -> pd.DataFrame:
         """Process trend analysis on live data"""
         
-        # Determine the metric to use
-        if 'production_tonnes' in df.columns:
-            metric = 'production_tonnes'
-        elif 'price_per_quintal' in df.columns:
-            metric = 'price_per_quintal'
-        elif 'area_hectares' in df.columns:
-            metric = 'area_hectares'
-        else:
-            # Use first numeric column
-            numeric_cols = df.select_dtypes(include=['number']).columns
-            metric = numeric_cols[0] if len(numeric_cols) > 0 else 'value'
+        try:
+            logger.info(f"Processing trend analysis on {len(df)} records")
+            logger.info(f"Available columns: {list(df.columns)}")
+            
+            # Determine the metric to use
+            if 'production_tonnes' in df.columns:
+                metric = 'production_tonnes'
+            elif 'price_per_quintal' in df.columns:
+                metric = 'price_per_quintal'
+            elif 'area_hectares' in df.columns:
+                metric = 'area_hectares'
+            else:
+                # Use first numeric column
+                numeric_cols = df.select_dtypes(include=['number']).columns
+                metric = numeric_cols[0] if len(numeric_cols) > 0 else None
+            
+            if not metric:
+                logger.warning("No numeric columns found for trend analysis")
+                return df.head(10)
+            
+            logger.info(f"Using metric: {metric}")
+            
+            # Try to group by year if available
+            if 'year' in df.columns and metric in df.columns:
+                logger.info("Grouping by year")
+                result = df.groupby('year')[metric].mean().reset_index()
+                result.columns = ['year', 'avg_value']
+                result['record_count'] = df.groupby('year').size().reset_index(drop=True)
+                return result.sort_values('year')
+            
+            # If no year column, try to group by date
+            elif 'date' in df.columns and metric in df.columns:
+                logger.info("Grouping by date (extracting year)")
+                df_copy = df.copy()
+                df_copy['date'] = pd.to_datetime(df_copy['date'], errors='coerce')
+                df_copy = df_copy.dropna(subset=['date'])
+                if len(df_copy) == 0:
+                    logger.warning("No valid dates found")
+                    return self._fallback_trend_analysis(df, metric)
+                
+                df_copy['year'] = df_copy['date'].dt.year
+                result = df_copy.groupby('year')[metric].mean().reset_index()
+                result.columns = ['year', 'avg_value']
+                result['record_count'] = df_copy.groupby('year').size().reset_index(drop=True)
+                return result.sort_values('year')
+            
+            # If no time dimension, group by state for comparison
+            elif 'state' in df.columns and metric in df.columns:
+                logger.info("Grouping by state (no time dimension available)")
+                result = df.groupby('state')[metric].mean().reset_index()
+                result.columns = ['state', 'avg_value']
+                result['record_count'] = df.groupby('state').size().reset_index(drop=True)
+                return result.sort_values('avg_value', ascending=False)
+            
+            # Fallback: return summary statistics
+            else:
+                logger.info("Using fallback trend analysis")
+                return self._fallback_trend_analysis(df, metric)
+                
+        except Exception as e:
+            logger.error(f"Error in trend processing: {str(e)}")
+            return df.head(10)
+    
+    def _fallback_trend_analysis(self, df: pd.DataFrame, metric: str) -> pd.DataFrame:
+        """Fallback trend analysis when no time/state grouping is possible"""
         
-        # Try to group by year if available
-        if 'year' in df.columns and metric in df.columns:
-            result = df.groupby('year')[metric].mean().reset_index()
-            result.columns = ['year', 'avg_value']
-            result['record_count'] = df.groupby('year').size().values
-            return result.sort_values('year')
-        
-        # If no year column, try to group by date
-        elif 'date' in df.columns and metric in df.columns:
-            df_copy = df.copy()
-            df_copy['date'] = pd.to_datetime(df_copy['date'], errors='coerce')
-            df_copy['year'] = df_copy['date'].dt.year
-            result = df_copy.groupby('year')[metric].mean().reset_index()
-            result.columns = ['year', 'avg_value']
-            result['record_count'] = df_copy.groupby('year').size().values
-            return result.sort_values('year')
-        
-        # If no time dimension, group by state for comparison
-        elif 'state' in df.columns and metric in df.columns:
-            result = df.groupby('state')[metric].mean().reset_index()
-            result.columns = ['state', 'avg_value']
-            result['record_count'] = df.groupby('state').size().values
-            return result.sort_values('avg_value', ascending=False)
-        
-        # Fallback: return summary statistics
-        else:
-            if metric in df.columns:
-                summary_data = {
-                    'metric': [metric],
-                    'avg_value': [df[metric].mean()],
-                    'record_count': [len(df)]
-                }
-                return pd.DataFrame(summary_data)
+        if metric and metric in df.columns:
+            summary_data = {
+                'metric': [metric],
+                'avg_value': [df[metric].mean()],
+                'record_count': [len(df)]
+            }
+            return pd.DataFrame(summary_data)
         
         return df.head(10)
     
