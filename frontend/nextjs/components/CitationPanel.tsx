@@ -47,23 +47,39 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
         </div>
       </div>
 
-      <div className="mb-4 text-sm text-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 p-3 rounded-xl border border-amber-200/50">
-        📝 <strong>Note:</strong> Original gov portal links may be outdated. Use download button for actual data samples.
+      <div className="mb-4 text-sm text-blue-700 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-xl border border-blue-200/50">
+        💡 <strong>Tip:</strong> Links redirect to data.gov.in search if original files moved. Use PDF download for processed data samples.
       </div>
       
       <div className="space-y-2">
         {citations.map((citation, index) => (
           <div key={index} className="flex items-start justify-between p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-gray-900 mb-2">
-                {citation.dataset_title}
-              </h4>
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="text-sm font-semibold text-gray-900">
+                  {citation.dataset_title}
+                </h4>
+                {citation.status_badge && (
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    citation.status_color === 'green' ? 'bg-green-100 text-green-700' :
+                    citation.status_color === 'amber' ? 'bg-amber-100 text-amber-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {citation.status_color === 'green' ? '⚡' : citation.status_color === 'amber' ? '🔍' : '🔍'} {citation.status_badge}
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-600 mb-1 font-medium">
                 Publisher: <span className="text-blue-600">{citation.publisher}</span>
               </p>
               {citation.query_summary && (
                 <p className="text-xs text-gray-500 italic">
                   {citation.query_summary}
+                </p>
+              )}
+              {citation.status_description && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {citation.status_description}
                 </p>
               )}
             </div>
@@ -96,11 +112,11 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
               </button>
               <span className="text-gray-400">|</span>
               <a
-                href={citation.resource_url.startsWith('http') ? citation.resource_url : `https://data.gov.in/search?title=${encodeURIComponent(citation.dataset_title)}`}
+                href={citation.resource_url || citation.search_url || `https://data.gov.in/search?title=${encodeURIComponent(citation.dataset_title)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 transition-colors"
-                title="View original dataset"
+                title={citation.status_description || "Search for dataset on data.gov.in"}
               >
                 <ExternalLink className="w-4 h-4" />
               </a>

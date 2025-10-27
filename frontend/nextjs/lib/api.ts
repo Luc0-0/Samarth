@@ -11,8 +11,12 @@ export interface QuestionRequest {
 export interface Citation {
   dataset_title: string;
   resource_url: string;
+  search_url?: string;
   publisher: string;
   query_summary: string;
+  status_badge?: string;
+  status_description?: string;
+  status_color?: string;
 }
 
 export interface ProvenanceData {

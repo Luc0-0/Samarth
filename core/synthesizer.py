@@ -7,6 +7,7 @@ import pandas as pd
 from typing import Dict, List, Any
 import json
 from datetime import datetime
+from .citation_helper import get_citation_display_info
 
 class AnswerSynthesizer:
     def __init__(self):
@@ -183,11 +184,21 @@ class AnswerSynthesizer:
         citations = []
         
         for source in sources:
+            # Get working URL and display info
+            dataset_id = source.get('dataset_id', '')
+            dataset_title = source['dataset_title']
+            
+            citation_info = get_citation_display_info(dataset_id, dataset_title)
+            
             citation = {
-                'dataset_title': source['dataset_title'],
-                'resource_url': source['resource_url'],
+                'dataset_title': dataset_title,
+                'resource_url': citation_info['url'],
+                'search_url': citation_info['search_url'],
                 'publisher': source.get('publisher', 'Unknown'),
-                'query_summary': f"Used {source['table_name']} table for {source['geo_granularity']} level data"
+                'query_summary': f"Used {source['table_name']} table for {source['geo_granularity']} level data",
+                'status_badge': citation_info['badge'],
+                'status_description': citation_info['description'],
+                'status_color': citation_info['color']
             }
             citations.append(citation)
             
