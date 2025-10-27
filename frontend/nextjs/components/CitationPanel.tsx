@@ -71,21 +71,39 @@ export const CitationPanel: React.FC<CitationPanelProps> = ({
             <div className="ml-3 flex space-x-2">
               <button
                 onClick={() => {
-                  const datasetId = citation.dataset_title.toLowerCase().includes('rainfall') ? 'climate-1' : 'agri-1';
-                  window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/raw/${datasetId}`, '_blank');
+                  // Generate PDF report
+                  const question = "Sample question for this dataset";
+                  fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/export-pdf`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                  })
+                  .then(response => response.blob())
+                  .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'samarth-report.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  })
+                  .catch(err => console.error('PDF download failed:', err));
                 }}
                 className="text-green-600 hover:text-green-800 transition-colors"
-                title="Download sample data"
+                title="Download PDF report"
               >
                 <Download className="w-4 h-4" />
               </button>
               <span className="text-gray-400">|</span>
-              <span
-                className="text-gray-500 cursor-not-allowed"
-                title="Original link may be outdated (common with gov portals)"
+              <a
+                href={citation.resource_url.startsWith('http') ? citation.resource_url : `https://data.gov.in/search?title=${encodeURIComponent(citation.dataset_title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 transition-colors"
+                title="View original dataset"
               >
                 <ExternalLink className="w-4 h-4" />
-              </span>
+              </a>
             </div>
           </div>
         ))}

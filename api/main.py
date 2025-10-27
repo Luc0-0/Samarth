@@ -5,7 +5,7 @@ Production-ready Q&A System for Indian Agriculture and Climate Data
 
 from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 import logging
 import json
@@ -13,6 +13,7 @@ import os
 import sys
 import time
 import uuid
+import io
 from datetime import datetime
 from typing import Optional, List
 import pandas as pd
@@ -25,6 +26,7 @@ from core.source_selector import SourceSelector
 from core.query_planner import QueryPlanner
 from core.live_query_planner import LiveQueryPlanner
 from core.synthesizer import AnswerSynthesizer
+from api.pdf_generator import generate_pdf_report
 
 # Environment variables
 DB_PATH = os.getenv('DB_PATH', 'db/canonical.duckdb')
@@ -202,6 +204,39 @@ async def ask_question(
     except Exception as e:
         logger.error(f"[{request_id}] Error processing question: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+@app.post("/export-pdf")
+async def export_pdf(request: QuestionRequest, req: Request):
+    """Export query results as PDF report"""
+    
+    request_id = getattr(req.state, 'request_id', str(uuid.uuid4()))
+    
+    try:
+        # Process the question first
+        intent = intent_parser.parse_question(request.question)
+        sources = source_selector.select_sources(intent)
+        query_result = query_planner.execute_query(intent, sources)
+        response = answer_synthesizer.synthesize_answer(intent, query_result, sources)
+        
+        # Generate PDF
+        pdf_buffer = generate_pdf_report(
+            question=request.question,
+            answer=response['answer_text'],
+            structured_results=response['structured_results'],
+            citations=response['citations'],
+            request_id=request_id
+        )
+        
+        # Return PDF as download
+        return StreamingResponse(
+            io.BytesIO(pdf_buffer.read()),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=samarth-report.pdf"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating PDF: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
 
 @app.get("/")
 async def root():
