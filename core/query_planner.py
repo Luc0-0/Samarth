@@ -34,10 +34,24 @@ class QueryPlanner:
     
     def _execute_comparison_query(self, intent: Dict, sources: List[Dict]) -> Dict[str, Any]:
         """Execute comparison queries"""
+        
+        # Check if this is a cross-metric comparison (rainfall vs production)
+        has_rainfall = 'rainfall' in intent['metrics']
+        has_production = any(m in intent['metrics'] for m in ['production', 'yield', 'output'])
+        
+        if has_rainfall and has_production:
+            # Cross-metric comparison: rainfall vs production
+            return self._execute_cross_metric_comparison(intent, sources)
+        
+        # Regular state comparison
         if len(intent['states']) < 2:
-            return {'error': 'Comparison requires at least 2 states', 'results': pd.DataFrame()}
+            # If only one state, compare different crops or years
+            if intent['crops'] and len(intent['crops']) > 1:
+                return self._execute_crop_comparison(intent, sources)
+            else:
+                return {'error': 'Comparison requires at least 2 states, crops, or metrics', 'results': pd.DataFrame()}
             
-        # Build comparison query
+        # Build regular state comparison query
         if 'rainfall' in intent['metrics']:
             table_name = 'climate_obs'
             metric_col = 'rainfall_mm'
@@ -66,6 +80,67 @@ class QueryPlanner:
             'results': results,
             'metric': metric_col,
             'table_used': table_name
+        }
+    
+    def _execute_cross_metric_comparison(self, intent: Dict, sources: List[Dict]) -> Dict[str, Any]:
+        """Execute cross-metric comparison (rainfall vs production)"""
+        
+        state_filter = ""
+        if intent['states']:
+            states_list = "', '".join(intent['states'])
+            state_filter = f"WHERE a.state IN ('{states_list}') AND c.state IN ('{states_list}')"
+        
+        query = f"""
+        SELECT 
+            a.state,
+            a.year,
+            AVG(a.production_tonnes) as avg_production,
+            AVG(c.rainfall_mm) as avg_rainfall
+        FROM agri_production a
+        JOIN climate_obs c ON a.state = c.state AND a.year = c.year
+        {state_filter}
+        GROUP BY a.state, a.year
+        ORDER BY a.year
+        """
+        
+        with duckdb.connect(self.db_path) as conn:
+            results = conn.execute(query).df()
+        
+        return {
+            'query': query,
+            'results': results,
+            'metric': 'production_vs_rainfall',
+            'table_used': 'agri_production + climate_obs'
+        }
+    
+    def _execute_crop_comparison(self, intent: Dict, sources: List[Dict]) -> Dict[str, Any]:
+        """Execute crop comparison within a state"""
+        
+        crops_list = "', '".join(intent['crops'])
+        state_filter = ""
+        if intent['states']:
+            states_list = "', '".join(intent['states'])
+            state_filter = f"AND state IN ('{states_list}')"
+        
+        query = f"""
+        SELECT 
+            crop,
+            AVG(production_tonnes) as avg_value,
+            COUNT(*) as record_count
+        FROM agri_production
+        WHERE crop IN ('{crops_list}') {state_filter}
+        GROUP BY crop
+        ORDER BY avg_value DESC
+        """
+        
+        with duckdb.connect(self.db_path) as conn:
+            results = conn.execute(query).df()
+        
+        return {
+            'query': query,
+            'results': results,
+            'metric': 'production_tonnes',
+            'table_used': 'agri_production'
         }
     
     def _execute_trend_query(self, intent: Dict, sources: List[Dict]) -> Dict[str, Any]:

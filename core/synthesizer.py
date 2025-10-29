@@ -60,6 +60,18 @@ class AnswerSynthesizer:
         """Synthesize comparison answer"""
         metric = query_result.get('metric', 'value')
         
+        if len(results_df) < 1:
+            return "Insufficient data for comparison."
+        
+        # Handle cross-metric comparison (rainfall vs production)
+        if metric == 'production_vs_rainfall':
+            return self._synthesize_cross_metric_answer(results_df)
+        
+        # Handle crop comparison
+        if 'crop' in results_df.columns:
+            return self._synthesize_crop_comparison_answer(results_df, metric)
+        
+        # Regular state comparison
         if len(results_df) < 2:
             return "Insufficient data for comparison."
             
@@ -75,6 +87,58 @@ class AnswerSynthesizer:
             for i, row in results_df.iterrows():
                 answer += f"{i+1}. {row['state']}: {row['avg_value']:.2f}\n"
                 
+        return answer
+    
+    def _synthesize_cross_metric_answer(self, results_df: pd.DataFrame) -> str:
+        """Synthesize cross-metric comparison answer"""
+        
+        if 'avg_production' not in results_df.columns or 'avg_rainfall' not in results_df.columns:
+            return "Unable to compare rainfall and production data."
+        
+        # Calculate correlation
+        correlation = results_df['avg_production'].corr(results_df['avg_rainfall'])
+        
+        # Get summary statistics
+        avg_production = results_df['avg_production'].mean()
+        avg_rainfall = results_df['avg_rainfall'].mean()
+        
+        # Find best and worst years
+        best_production_year = results_df.loc[results_df['avg_production'].idxmax()]
+        worst_production_year = results_df.loc[results_df['avg_production'].idxmin()]
+        
+        answer = f"**Rainfall vs Crop Production Analysis**:\n\n"
+        answer += f"**Average Production**: {avg_production:.2f} tonnes\n"
+        answer += f"**Average Rainfall**: {avg_rainfall:.2f} mm\n\n"
+        
+        # Correlation analysis
+        if correlation > 0.3:
+            strength = "positive"
+        elif correlation < -0.3:
+            strength = "negative"
+        else:
+            strength = "weak"
+            
+        answer += f"**Correlation**: {strength} relationship (r = {correlation:.3f})\n\n"
+        
+        answer += f"**Best Production Year**: {int(best_production_year['year'])} "
+        answer += f"({best_production_year['avg_production']:.2f} tonnes, {best_production_year['avg_rainfall']:.2f} mm rainfall)\n"
+        
+        answer += f"**Worst Production Year**: {int(worst_production_year['year'])} "
+        answer += f"({worst_production_year['avg_production']:.2f} tonnes, {worst_production_year['avg_rainfall']:.2f} mm rainfall)\n"
+        
+        return answer
+    
+    def _synthesize_crop_comparison_answer(self, results_df: pd.DataFrame, metric: str) -> str:
+        """Synthesize crop comparison answer"""
+        
+        answer = f"**Crop Production Comparison**:\n\n"
+        
+        for i, row in results_df.iterrows():
+            rank = i + 1
+            crop = row['crop']
+            value = row['avg_value']
+            answer += f"{rank}. {crop}: {value:.2f} tonnes (avg)\n"
+        
         return answer
     
     def _synthesize_trend_answer(self, intent: Dict, query_result: Dict, results_df: pd.DataFrame) -> str:
