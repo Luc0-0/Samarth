@@ -8,6 +8,7 @@ from typing import Dict, List, Any
 import logging
 from .live_fetcher import LiveDataFetcher
 from .query_planner import QueryPlanner
+from .universal_handler import UniversalHandler
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class LiveQueryPlanner(QueryPlanner):
     def __init__(self, db_path: str, api_key: str = None):
         super().__init__(db_path)
         self.live_fetcher = LiveDataFetcher(api_key) if api_key else None
+        self.universal_handler = UniversalHandler(db_path)
         
     def execute_query(self, intent: Dict, sources: List[Dict]) -> Dict[str, Any]:
         """Execute query with live data fetching capability"""
@@ -31,9 +33,16 @@ class LiveQueryPlanner(QueryPlanner):
                 import traceback
                 logger.error(f"Full traceback: {traceback.format_exc()}")
         
-        # Fallback to local data
+        # Try local data
         logger.info("Using local database for query")
-        return super().execute_query(intent, sources)
+        try:
+            result = super().execute_query(intent, sources)
+        except Exception as e:
+            logger.error(f"Local query failed: {str(e)}")
+            result = {'error': str(e)}
+        
+        # Use universal handler for any failed queries
+        return self.universal_handler.handle_any_question(intent, sources, result)
     
     def _should_use_live_data(self, intent: Dict) -> bool:
         """Determine if we should fetch live data"""
