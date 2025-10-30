@@ -83,19 +83,17 @@ class LiveDataFetcher:
     def get_agriculture_data(self, states: List[str] = None, crops: List[str] = None) -> pd.DataFrame:
         """Fetch live agriculture production data"""
         
-        # Try known working resource IDs from data inventory
+        # Try production-specific resource IDs
         resource_ids = [
-            "9ef84268-d588-465a-a308-a864a43d0070",  # Market prices
             "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69",  # Agriculture production
         ]
         
-        logger.info(f"Attempting to fetch live agriculture data for states: {states}, crops: {crops}")
+        logger.info(f"Attempting to fetch live agriculture production data for states: {states}, crops: {crops}")
         
         for resource_id in resource_ids:
             try:
                 filters = {}
                 if states:
-                    # Try different filter formats
                     for state_field in ['state', 'state_name', 'State', 'State_Name']:
                         filters[f'filters[{state_field}]'] = ','.join(states)
                 if crops:
@@ -104,15 +102,48 @@ class LiveDataFetcher:
                     
                 df = self.fetch_dataset(resource_id, filters)
                 if not df.empty:
-                    logger.info(f"Successfully fetched {len(df)} records from {resource_id}")
+                    logger.info(f"Successfully fetched {len(df)} production records from {resource_id}")
                     return df
                 else:
-                    logger.warning(f"No data returned from resource {resource_id}")
+                    logger.warning(f"No production data returned from resource {resource_id}")
             except Exception as e:
-                logger.error(f"Failed to fetch from resource {resource_id}: {str(e)}")
+                logger.error(f"Failed to fetch production from resource {resource_id}: {str(e)}")
                 continue
                 
-        logger.warning("No live agriculture data available from any resource")
+        logger.warning("No live agriculture production data available")
+        return pd.DataFrame()
+    
+    def get_market_prices(self, states: List[str] = None, crops: List[str] = None) -> pd.DataFrame:
+        """Fetch live market price data specifically"""
+        
+        # Try price-specific resource IDs
+        resource_ids = [
+            "9ef84268-d588-465a-a308-a864a43d0070",  # Market prices
+        ]
+        
+        logger.info(f"Attempting to fetch live market price data for states: {states}, crops: {crops}")
+        
+        for resource_id in resource_ids:
+            try:
+                filters = {}
+                if states:
+                    for state_field in ['state', 'state_name', 'State', 'State_Name']:
+                        filters[f'filters[{state_field}]'] = ','.join(states)
+                if crops:
+                    for crop_field in ['crop', 'commodity', 'Crop', 'Commodity']:
+                        filters[f'filters[{crop_field}]'] = ','.join(crops)
+                    
+                df = self.fetch_dataset(resource_id, filters)
+                if not df.empty:
+                    logger.info(f"Successfully fetched {len(df)} price records from {resource_id}")
+                    return df
+                else:
+                    logger.warning(f"No price data returned from resource {resource_id}")
+            except Exception as e:
+                logger.error(f"Failed to fetch prices from resource {resource_id}: {str(e)}")
+                continue
+                
+        logger.warning("No live market price data available")
         return pd.DataFrame()
     
     def get_rainfall_data(self, states: List[str] = None) -> pd.DataFrame:

@@ -33,7 +33,12 @@ class LiveQueryPlanner(QueryPlanner):
                 import traceback
                 logger.error(f"Full traceback: {traceback.format_exc()}")
         
-        # Try local data
+        # For price queries, don't fall back to local data - use universal handler directly
+        if self._is_price_query(intent):
+            logger.info("Price query detected, using universal handler for proper error message")
+            return self.universal_handler.handle_any_question(intent, sources, {'error': 'Live API not available for price data'})
+        
+        # Try local data for non-price queries
         logger.info("Using local database for query")
         try:
             result = super().execute_query(intent, sources)
@@ -44,18 +49,31 @@ class LiveQueryPlanner(QueryPlanner):
         # Use universal handler for any failed queries
         return self.universal_handler.handle_any_question(intent, sources, result)
     
+    def _is_price_query(self, intent: Dict) -> bool:
+        """Check if this is a price query"""
+        question_lower = intent.get('question', '').lower()
+        return ('price' in intent.get('metrics', []) or 
+                any(word in question_lower for word in ['price', 'market', 'cost', 'rate', 'mandi']))
+    
     def _should_use_live_data(self, intent: Dict) -> bool:
         """Determine if we should fetch live data"""
         
         question_lower = intent.get('question', '').lower()
         
-        # Use live data for current/recent queries or price queries
-        if intent.get('query_type') == 'current':
-            return True
+        # Always use live data for price queries
         if 'price' in intent.get('metrics', []):
+            logger.info("Using live data: price metric detected")
             return True
-        # Check for live keywords in the question (even for trend analysis)
-        if any(keyword in question_lower for keyword in ['current', 'latest', 'recent', 'live', 'market', 'now', 'today']):
+        if any(keyword in question_lower for keyword in ['price', 'market', 'cost', 'rate', 'mandi']):
+            logger.info("Using live data: price keywords detected")
+            return True
+        # Use live data for current/recent queries
+        if intent.get('query_type') == 'current':
+            logger.info("Using live data: current query type")
+            return True
+        # Check for live keywords in the question
+        if any(keyword in question_lower for keyword in ['current', 'latest', 'recent', 'live', 'now', 'today']):
+            logger.info("Using live data: temporal keywords detected")
             return True
             
         return False
@@ -66,13 +84,22 @@ class LiveQueryPlanner(QueryPlanner):
         results_df = pd.DataFrame()
         data_sources_used = []
         
-        # Try multiple data fetching strategies
-        fetch_strategies = [
-            ('live_sources', self._fetch_from_live_sources),
-            ('agriculture_api', self._fetch_agriculture_data),
-            ('rainfall_api', self._fetch_rainfall_data),
-            ('market_api', self._fetch_market_data)
-        ]
+        # Prioritize market data for price queries
+        question_lower = intent.get('question', '').lower()
+        if any(word in question_lower for word in ['price', 'market', 'cost', 'rate', 'mandi']) or 'price' in intent.get('metrics', []):
+            fetch_strategies = [
+                ('market_api', self._fetch_market_data),
+                ('live_sources', self._fetch_from_live_sources),
+                ('agriculture_api', self._fetch_agriculture_data)
+            ]
+            logger.info("Using price-prioritized fetch strategies")
+        else:
+            fetch_strategies = [
+                ('live_sources', self._fetch_from_live_sources),
+                ('agriculture_api', self._fetch_agriculture_data),
+                ('rainfall_api', self._fetch_rainfall_data),
+                ('market_api', self._fetch_market_data)
+            ]
         
         for strategy_name, fetch_method in fetch_strategies:
             try:
@@ -136,8 +163,8 @@ class LiveQueryPlanner(QueryPlanner):
         """Fetch market price data if query is about prices"""
         question_lower = intent.get('question', '').lower()
         if any(word in question_lower for word in ['price', 'market', 'cost', 'rate', 'mandi']):
-            # Try to get market price data specifically
-            return self.live_fetcher.get_agriculture_data(
+            # Try to get market price data specifically using price resource ID
+            return self.live_fetcher.get_market_prices(
                 states=intent.get('states', []),
                 crops=intent.get('crops', [])
             )

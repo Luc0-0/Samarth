@@ -22,6 +22,10 @@ class UniversalHandler:
         
         logger.info(f"Original query failed, trying fallbacks for: {intent.get('question', 'Unknown')}")
         
+        # Special handling for price queries
+        if self._is_price_query(intent):
+            return self._handle_price_query_fallback(intent)
+        
         # Try fallback strategies in order
         strategies = [
             self._try_general_aggregation,
@@ -162,6 +166,31 @@ class UniversalHandler:
             'metric': 'sample_data',
             'table_used': 'agri_production',
             'fallback_used': 'sample_data'
+        }
+    
+    def _is_price_query(self, intent: Dict) -> bool:
+        """Check if this is a price query"""
+        question_lower = intent.get('question', '').lower()
+        return ('price' in intent.get('metrics', []) or 
+                any(word in question_lower for word in ['price', 'market', 'cost', 'rate', 'mandi']))
+    
+    def _handle_price_query_fallback(self, intent: Dict) -> Dict[str, Any]:
+        """Handle price query when live API is not available"""
+        logger.info("Handling price query fallback")
+        
+        states = intent.get('states', [])
+        crops = intent.get('crops', [])
+        
+        state_text = f" in {', '.join(states)}" if states else ""
+        crop_text = f" for {', '.join(crops)}" if crops else ""
+        
+        return {
+            'answer_text': f"I cannot provide current market prices{crop_text}{state_text} because the live data API is not available. Market prices require real-time data from government APIs. Please try again later or contact support if this issue persists.",
+            'structured_results': [],
+            'citations': [],
+            'suggestion': 'Try asking about historical production data instead, like "rice production in Punjab from 2010 to 2014"',
+            'error_type': 'live_api_unavailable',
+            'query_type': 'price_query_failed'
         }
     
     def _return_helpful_message(self, intent: Dict) -> Dict[str, Any]:
