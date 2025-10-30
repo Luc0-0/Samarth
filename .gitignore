@@ -46,8 +46,9 @@ logs/
 ingestion/logs/
 
 # Database
-*.db
 *.sqlite
+# Keep DuckDB files for deployment
+!db/*.duckdb
 
 # Node.js
 node_modules/
