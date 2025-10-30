@@ -26,7 +26,7 @@ from core.source_selector import SourceSelector
 from core.query_planner import QueryPlanner
 from core.live_query_planner import LiveQueryPlanner
 from core.synthesizer import AnswerSynthesizer
-from api.pdf_generator import generate_pdf_report
+# from api.pdf_generator import generate_pdf_report  # Disabled for deployment
 
 # Environment variables
 DB_PATH = os.getenv('DB_PATH', 'db/canonical.duckdb')
@@ -210,36 +210,8 @@ async def ask_question(
 
 @app.post("/export-pdf")
 async def export_pdf(request: QuestionRequest, req: Request):
-    """Export query results as PDF report"""
-    
-    request_id = getattr(req.state, 'request_id', str(uuid.uuid4()))
-    
-    try:
-        # Process the question first
-        intent = intent_parser.parse_question(request.question)
-        sources = source_selector.select_sources(intent)
-        query_result = query_planner.execute_query(intent, sources)
-        response = answer_synthesizer.synthesize_answer(intent, query_result, sources)
-        
-        # Generate PDF
-        pdf_buffer = generate_pdf_report(
-            question=request.question,
-            answer=response['answer_text'],
-            structured_results=response['structured_results'],
-            citations=response['citations'],
-            request_id=request_id
-        )
-        
-        # Return PDF as download
-        return StreamingResponse(
-            io.BytesIO(pdf_buffer.read()),
-            media_type="application/pdf",
-            headers={"Content-Disposition": "attachment; filename=samarth-report.pdf"}
-        )
-        
-    except Exception as e:
-        logger.error(f"Error generating PDF: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"PDF generation failed: {str(e)}")
+    """Export query results as PDF report - Disabled for deployment"""
+    raise HTTPException(status_code=501, detail="PDF export temporarily disabled")
 
 @app.get("/")
 async def root():
@@ -404,6 +376,6 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
         app, 
-        host=os.getenv('API_HOST', '127.0.0.1'), 
-        port=int(os.getenv('API_PORT', 8000))
+        host=os.getenv('API_HOST', '0.0.0.0'), 
+        port=int(os.getenv('PORT', os.getenv('API_PORT', 8000)))
     )
