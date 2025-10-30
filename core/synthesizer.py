@@ -22,6 +22,14 @@ class AnswerSynthesizer:
                 'structured_results': [],
                 'citations': []
             }
+        
+        # Handle universal handler responses that don't have 'results' key
+        if 'answer_text' in query_result:
+            return {
+                'answer_text': query_result['answer_text'],
+                'structured_results': query_result.get('structured_results', []),
+                'citations': query_result.get('citations', self._generate_citations(sources))
+            }
             
         results_df = query_result['results']
         
