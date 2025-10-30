@@ -147,6 +147,9 @@ async def ask_question(
         # Step 3: Execute query
         query_result = query_planner.execute_query(intent, sources)
         logger.info(f"[{request_id}] Query executed, got {len(query_result.get('results', []))} results")
+        logger.info(f"[{request_id}] Query result keys: {list(query_result.keys())}")
+        logger.info(f"[{request_id}] Data source used: {query_result.get('data_source', 'unknown')}")
+        logger.info(f"[{request_id}] Metric detected: {query_result.get('metric', 'unknown')}")
         
         # Step 4: Synthesize answer
         response = answer_synthesizer.synthesize_answer(intent, query_result, sources)
@@ -343,6 +346,40 @@ async def get_raw_data(dataset_id: str):
             query = "SELECT * FROM agri_production LIMIT 10"
         elif dataset_id.startswith('climate'):
             query = "SELECT * FROM climate_obs LIMIT 10"
+        elif dataset_id.startswith('live'):
+            # For live datasets, return sample structure with mock data
+            if 'live-1' in dataset_id:
+                # Market prices structure
+                sample_data = {
+                    'state': ['Maharashtra', 'Punjab', 'Gujarat'],
+                    'district': ['Mumbai', 'Ludhiana', 'Ahmedabad'],
+                    'commodity': ['Rice', 'Wheat', 'Cotton'],
+                    'modal_price': [2500, 2200, 5500],
+                    'arrival_date': ['2024-01-15', '2024-01-15', '2024-01-15']
+                }
+            else:
+                # Production structure
+                sample_data = {
+                    'state': ['Maharashtra', 'Punjab', 'Gujarat'],
+                    'crop': ['Rice', 'Wheat', 'Cotton'],
+                    'season': ['Kharif', 'Rabi', 'Kharif'],
+                    'area': [1000, 1200, 800],
+                    'production': [2500, 2800, 1600]
+                }
+            
+            results = pd.DataFrame(sample_data)
+            conn.close()
+            
+            return {
+                "dataset_id": dataset_id,
+                "dataset_title": dataset_row.iloc[0]['dataset_title'],
+                "resource_url": dataset_row.iloc[0]['resource_url'],
+                "sample_rows": results.to_dict('records'),
+                "total_sample_rows": len(results),
+                "query_used": "Live API sample data structure",
+                "timestamp": datetime.now().isoformat(),
+                "note": "This is sample data structure. Actual data comes from live API."
+            }
         else:
             raise HTTPException(status_code=404, detail="No sample data available")
         
