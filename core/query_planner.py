@@ -72,8 +72,12 @@ class QueryPlanner:
         ORDER BY avg_value DESC
         """
         
+        logger.info(f"Comparison query: {query}")
+        logger.info(f"Requested states: {intent['states']}")
+        
         with duckdb.connect(self.db_path) as conn:
             results = conn.execute(query).df()
+            logger.info(f"Query returned {len(results)} states: {list(results['state']) if not results.empty else 'none'}")
         
         return {
             'query': query,
