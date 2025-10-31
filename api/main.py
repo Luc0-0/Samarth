@@ -68,6 +68,13 @@ start_time = time.time()
 # Initialize components
 intent_parser = IntentParser()
 source_selector = SourceSelector()
+
+# Debug API key status
+if GOV_API_KEY:
+    logger.info(f"API key loaded: {GOV_API_KEY[:10]}...{GOV_API_KEY[-4:] if len(GOV_API_KEY) > 14 else 'short'}")
+else:
+    logger.warning("No GOV_API_KEY found in environment variables")
+
 query_planner = LiveQueryPlanner(DB_PATH, GOV_API_KEY)  # Use live query planner
 answer_synthesizer = AnswerSynthesizer()
 
@@ -255,6 +262,7 @@ async def health_check():
         "version": "3.0.0",
         "environment": ENVIRONMENT,
         "database": db_status,
+        "api_key_status": "configured" if GOV_API_KEY else "missing",
         "uptime_seconds": time.time() - start_time
     }
 
