@@ -20,10 +20,13 @@ interface ChatMessage {
 
 const SAMPLE_QUESTIONS = [
   "Compare the average annual rainfall in Maharashtra and Punjab",
-  "What are the current crop prices in Maharashtra?", 
+  "What is the current market price of rice in Punjab?",
+  "Which state has the highest rice production?", 
+  "Analyze the production trend of cotton from 2010 to 2014",
   "Show me latest market rates for Punjab",
-  "Which state has the highest rice production?",
-  "Analyze the production trend of cotton from 2010 to 2014"
+  "Compare rice production in Punjab and Maharashtra",
+  "What are the current crop prices in Maharashtra?",
+  "Correlation between rainfall and crop production"
 ];
 
 const LIVE_KEYWORDS = ['current', 'latest', 'recent', 'live', 'today', 'now', 'market', 'price'];
@@ -213,8 +216,8 @@ export default function Home() {
               </p>
             </div>
             
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Try these sample questions:</h2>
-            <div className="grid gap-4 md:grid-cols-2">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">🎯 Demo Questions - Click to Try:</h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-2">
               {SAMPLE_QUESTIONS.map((question, index) => {
                 const isLive = LIVE_KEYWORDS.some(keyword => question.toLowerCase().includes(keyword));
                 return (
@@ -260,7 +263,7 @@ export default function Home() {
                 
                 {/* Data Source Indicator */}
                 {message.response && (
-                  <div className="mt-3 flex items-center">
+                  <div className="mt-3 flex items-center space-x-2">
                     {message.response.processing_info.query_type === 'current' ? (
                       <span className="flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full shadow-md">
                         ⚡ Live API Data
@@ -268,6 +271,12 @@ export default function Home() {
                     ) : (
                       <span className="flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full shadow-md">
                         📈 Historical Data
+                      </span>
+                    )}
+                    {/* Mock Data Warning */}
+                    {message.response.structured_results?.some((result: any) => result.source === 'Mock Data') && (
+                      <span className="flex items-center px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full shadow-md">
+                        🔧 Demo Data (API Unavailable)
                       </span>
                     )}
                   </div>
@@ -359,7 +368,7 @@ export default function Home() {
           </div>
         )}
 
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-32" />
       </main>
 
       {/* Input Form */}

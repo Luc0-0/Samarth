@@ -176,21 +176,61 @@ class UniversalHandler:
     
     def _handle_price_query_fallback(self, intent: Dict) -> Dict[str, Any]:
         """Handle price query when live API is not available"""
-        logger.info("Handling price query fallback")
+        logger.info("Handling price query fallback with mock data")
         
         states = intent.get('states', [])
         crops = intent.get('crops', [])
         
-        state_text = f" in {', '.join(states)}" if states else ""
+        # Generate mock price data for demo
+        mock_prices = {
+            'Rice': {'Punjab': 2200, 'Maharashtra': 2100, 'West Bengal': 2000},
+            'Cotton': {'Punjab': 5500, 'Gujarat': 5800, 'Maharashtra': 5400},
+            'Wheat': {'Punjab': 2000, 'Uttar Pradesh': 1950, 'Haryana': 2050}
+        }
+        
+        results = []
+        for crop in crops if crops else ['Rice', 'Cotton', 'Wheat']:
+            for state in states if states else ['Punjab', 'Maharashtra', 'Gujarat']:
+                if crop in mock_prices and state in mock_prices[crop]:
+                    results.append({
+                        'crop': crop,
+                        'state': state,
+                        'price_per_quintal': mock_prices[crop][state],
+                        'date': '2024-01-15',
+                        'source': 'Mock Data'
+                    })
+        
+        if not results:
+            # Fallback to generic mock data
+            results = [{
+                'crop': crops[0] if crops else 'Rice',
+                'state': states[0] if states else 'Punjab', 
+                'price_per_quintal': 2200,
+                'date': '2024-01-15',
+                'source': 'Mock Data'
+            }]
+        
         crop_text = f" for {', '.join(crops)}" if crops else ""
+        state_text = f" in {', '.join(states)}" if states else ""
+        
+        answer = f"**Mock Market Prices{crop_text}{state_text}** (Demo Data):\n\n"
+        for result in results:
+            answer += f"• {result['crop']} in {result['state']}: ₹{result['price_per_quintal']} per quintal\n"
+        
+        answer += "\n*Note: This is mock data for demonstration. For real prices, a government API key is required.*"
         
         return {
-            'answer_text': f"I cannot provide current market prices{crop_text}{state_text} because the live data API is not available. Market prices require real-time data from government APIs. Please try again later or contact support if this issue persists.",
-            'structured_results': [],
-            'citations': [],
-            'suggestion': 'Try asking about historical production data instead, like "rice production in Punjab from 2010 to 2014"',
-            'error_type': 'live_api_unavailable',
-            'query_type': 'price_query_failed'
+            'answer_text': answer,
+            'structured_results': results,
+            'citations': [{
+                'dataset_title': 'Mock Market Price Data',
+                'resource_url': 'https://data.gov.in/',
+                'publisher': 'Demo System',
+                'query_summary': 'Mock data for demonstration purposes'
+            }],
+            'suggestion': 'Get a real API key from data.gov.in for live market prices',
+            'error_type': 'using_mock_data',
+            'query_type': 'price_query_mock'
         }
     
     def _return_helpful_message(self, intent: Dict) -> Dict[str, Any]:

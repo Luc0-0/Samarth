@@ -78,6 +78,11 @@ class QueryPlanner:
         with duckdb.connect(self.db_path) as conn:
             results = conn.execute(query).df()
             logger.info(f"Query returned {len(results)} states: {list(results['state']) if not results.empty else 'none'}")
+            
+            # Filter results to only requested states (case-insensitive)
+            if not results.empty and intent['states']:
+                requested_states_lower = [s.lower() for s in intent['states']]
+                results = results[results['state'].str.lower().isin(requested_states_lower)]
         
         return {
             'query': query,

@@ -77,7 +77,8 @@ class LiveQueryPlanner(QueryPlanner):
             'query': 'Mock price data (API unavailable)',
             'metric': 'price_per_quintal',
             'data_source': 'mock_data',
-            'note': 'Using demo data - government API temporarily unavailable'
+            'note': 'Using demo data - government API temporarily unavailable',
+            'is_mock_data': True
         }
     
     def _is_price_query(self, intent: Dict) -> bool:
